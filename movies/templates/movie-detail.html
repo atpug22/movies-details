@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>{{ book.title }} | Library</title>
+{% endblock %}
+
+{% block content %}
+<h2>Title: {{ movie.title }}</h2>
+
+<dl>
+    <dt>Released On:</dt>
+    <dd>{{movie.release_date}}</dd>
+    <dt>Director:</dt>
+    <dd>{{ movie.director }}</dd>
+    <dt>Starring:</dt>
+    <dd>{{ movie.actors }}</dd>
+    <dt>Description:</dt>
+    <dd>{{ movie.description }}</dd>
+    <div class="embed-responsive embed-responsive-4by3">
+        <iframe class="embed-responsive-item" width="420" height="315" src="{{movie.movie_url}}"
+            allowfullscreen></iframe>
+    </div>
+    <div class="col-md-8 card mb-4  mt-3 ">
+        <div class="card-body">
+            <h3>Comments: {{comments.count}} </h3>
+            {% for comment in comments %}
+            <div class="comments" style="padding: 10px;">
+                <p class="font-weight-bold">
+                    {{comment.user.get_full_name}}
+                    <span class=" text-muted font-weight-normal">
+                        {{ comment.created_date }}
+                    </span>
+                </p>
+                {{ comment.body | linebreaks }}
+            </div>
+            {% empty %}
+            <p>No comments here yet :(</p>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-md-8 card mb-4  mt-3 ">
+        <div class="card-body">
+          <h3>Leave a comment</h3>
+          <form method="post" class="form-group" style="margin-top: 1.3em;">
+            {% csrf_token %}
+            <input type="text" name="comment" class="form-control mb-3" placeholder="Leave a Comment">
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+      </div>
+</dl>
+{% endblock %}

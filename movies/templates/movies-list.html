@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>
+    Movies List
+</title>
+{% endblock %}
+
+{% block content %}
+
+<h3>Books list</h3>
+<div class="row">
+    <div class="col-sm-3">
+        Title: <input type="text" name="title" id="title">
+    </div>
+</div>
+<div class="row">
+    <button id="search_button" class="btn btn-primary">Search</button>
+</div>
+<table class="table" id="datatable">
+    <thead>
+        <tr>
+        <th scope="col">#</th>
+        <th scope="col">Title</th>
+        <th scope="col">Released On</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for movie in movies %}
+        <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+        <td><a href="/movie/{{ movie.id }}/">{{ movie.title }}</a></td>
+        <td>{{ movie.release_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
