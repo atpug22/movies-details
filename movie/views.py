@@ -17,7 +17,7 @@ def movielist(request):
     context={
         "movies":movies,
     }
-    if request.method=="POST":
+    if request.method=="POST" and request.user.is_superuser:
         mid=request.POST.get("mid")
         Movies.objects.get(pk=mid).delete()
         return HttpResponse(status=201)

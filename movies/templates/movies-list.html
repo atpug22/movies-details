@@ -33,10 +33,6 @@
     </tbody>
 </table> -->
 <style>
-    .movie-card:hover {
-        cursor: pointer;
-    }
-
     .movie-card {
         margin: 0;
         width: 200px;
@@ -53,13 +49,18 @@
                     <h5 class="card-title">{{ movie.title }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">by {{movie.director}}</h6>
                     <p class="card-text mb-4" style="font-size: 0.9rem;">
-                        Released On: {{movie.release_date}} 
+                        Released On: {{movie.release_date}}
                     </p>
-                    <div ><button onclick="window.location.href='/movie/{{ movie.id }}/'" type="button"
-                        class="btn btn-primary">Details</button>
-                    <button type="button" class="btn btn-danger delete"
-                        name="{{movie.id}}" id="delete_movie">Delete</button></div>
-                    
+                    {% if user.is_superuser %}
+                    <div><button onclick="window.location.href='/movie/{{ movie.id }}/'" type="button"
+                            class="btn btn-primary">Details</button>
+                        <button type="button" class="btn btn-danger delete" name="{{movie.id}}"
+                            id="delete_movie">Delete</button>
+                    </div>
+                    {%else%}
+                    <button onclick="window.location.href='/movie/{{ movie.id }}/'" type="button"
+                            class="btn btn-primary">Details</button>
+                    {%endif%}
                 </div>
             </div>
         </div>
@@ -69,24 +70,26 @@
 </div>
 <script>
     $(document).ready(function () {
-    $(".delete").click(function(){
-        var id = $(this).attr('name');
-        let confirmation = confirm("Are you sure you want to remove this Movie?");
-        if (confirmation) {
-        $.ajax({
-            url: "",
-            method: "POST",
-            headers: {
-                'X-CSRFToken': '{{csrf_token}}'
-            },
-            data:{
-                mid:id,
-            },
-            success:function(data){
-                window.location.reload()
-            },
-        });}
-    });});
+        $(".delete").click(function () {
+            var id = $(this).attr('name');
+            let confirmation = confirm("Are you sure you want to remove this Movie?");
+            if (confirmation) {
+                $.ajax({
+                    url: "",
+                    method: "POST",
+                    headers: {
+                        'X-CSRFToken': '{{csrf_token}}'
+                    },
+                    data: {
+                        mid: id,
+                    },
+                    success: function (data) {
+                        window.location.reload()
+                    },
+                });
+            }
+        });
+    });
 </script>
 
 {% endblock %}
