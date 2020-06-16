@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>New Movie</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label>Title:</label>
+      <input type="text" name="title" class="form-control" placeholder="Movie Title" id="inputtitle" required/>
+    </div>
+    <div class="form-group">
+      <label>Director</label>
+      <input type="text" name="director" class="form-control" placeholder="Director" id="inputdirectorname" required/>
+    </div>
+    <div class="form-group">
+      <label>Release Date:</label>
+      <input type="date" class="form-control"  name="release_date" id="inputdate" required/>
+    </div>
+    <div class="form-group">
+      <label >Starring:</label>
+      <input type="text" class="form-control" name="actors" id="inputactorsname" required/>
+    </div>
+    <div class="form-group">
+      <label>Movie Url:</label>
+      <input type="url" class="form-control" name="movie_url" id="inputmovieurl" required/>
+    </div>
+    <div class="form-group">
+        <label >Description:</label>
+        <input type="text" class="form-control" name="description" id="inputdescription" />
+    </div>
+    <button type="submit" class="btn btn-primary">Add New Movie</button>
+    {% if msg %}<script>alert("{{msg}}")</script>{% endif %}
+  </form>
+  
+{% endblock %}
