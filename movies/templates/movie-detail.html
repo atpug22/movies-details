@@ -1,52 +1,173 @@
 {% extends "base.html" %}
 
 {% block title %}
-<title>{{ book.title }} | Library</title>
+<title>{{ movie.title }}</title>
 {% endblock %}
 
 {% block content %}
-<h2>Title: {{ movie.title }}</h2>
+<div class="container">
+    <div class="row">
+        <div class="col-8">
+            <h2 class="details">Title: {{ movie.title }}</h2>
+        </div>
+        {% if user.is_superuser %}
+        <div class="col-4"><button class="btn btn-danger mt-1 details" name="{{movie.id}}" id="update-data">Change
+                Data</button>
+        </div>
+        {%endif%}
+    </div>
+</div>
 
+
+<style>
+    .update {
+        display: none;
+    }
+</style>
 <dl>
-    <dt>Released On:</dt>
-    <dd>{{movie.release_date}}</dd>
-    <dt>Director:</dt>
-    <dd>{{ movie.director }}</dd>
-    <dt>Starring:</dt>
-    <dd>{{ movie.actors }}</dd>
-    <dt>Description:</dt>
-    <dd>{{ movie.description }}</dd>
-    <div class="embed-responsive embed-responsive-4by3">
+    <form method="post">
+        {% csrf_token %}
+        <dt class="update">Title:</dt>
+        <dd class="form-group update"><input type="text" name="update_title" class="form-control"
+                value="{{movie.title}}" placeholder="Movie Title" id="inputtitle" required /></dd>
+        <dt class="details">Released On:</dt>
+        <dd class="details">{{movie.release_date}}</dd>
+        <dt>Director:</dt>
+        <dd class="details">{{ movie.director }}</dd>
+        <dd class="form-group update"> <input type="text" name="update_director" value="{{movie.director}}"
+                class="form-control" placeholder="Director" id="inputdirectorname" required /></dd>
+        <dt>Starring:</dt>
+        <dd class="details">{{ movie.actors }}</dd>
+        <dd class="form-group update"><input type="text" class="form-control" name="update_actors" id="inputactorsname"
+                value="{{movie.actors}}" required /></dd>
+        <dt>Description:</dt>
+        <dd class="details">{{ movie.description }}</dd>
+        <dd class="form-group update"><input type="text" class="form-control" name="update_description"
+                value="{{movie.description}}" id="inputdescription" /></dd>
+        <dt class="update">Movie Url:</dt>
+        <dd class="form-group update"><input type="url" class="form-control" name="update_movie_url"
+                value="{{movie.movie_url}}" id="inputmovieurl" required /></dd>
+        <button type="submit" class="btn btn-primary update" id="submit_updated_data">Update data</button>
+    </form>
+    <div class="embed-responsive embed-responsive-4by3 details col-8">
         <iframe class="embed-responsive-item" width="420" height="315" src="{{movie.movie_url}}"
             allowfullscreen></iframe>
     </div>
     <div class="col-md-8 card mb-4  mt-3 ">
         <div class="card-body">
-            <h3>Comments: {{comments.count}} </h3>
-            {% for comment in comments %}
-            <div class="comments" style="padding: 10px;">
-                <p class="font-weight-bold">
-                    {{comment.user.get_full_name}}
-                    <span class=" text-muted font-weight-normal">
-                        {{ comment.created_date }}
-                    </span>
-                </p>
-                {{ comment.body | linebreaks }}
+            <h3>Comments: <span id="comments_count">0</span></h3>
+            <div class="comments" style="padding: 10px;" id="comments-section">
             </div>
-            {% empty %}
-            <p>No comments here yet :(</p>
-            {% endfor %}
         </div>
     </div>
     <div class="col-md-8 card mb-4  mt-3 ">
         <div class="card-body">
-          <h3>Leave a comment</h3>
-          <form method="post" class="form-group" style="margin-top: 1.3em;">
-            {% csrf_token %}
-            <input type="text" name="comment" class="form-control mb-3" placeholder="Leave a Comment">
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </form>
+            <h3>Leave a comment</h3>
+            <form class="form-group" style="margin-top: 1.3em;">
+                {% csrf_token %}
+                <input type="text" class="form-control mb-3" placeholder="Leave a Comment" id="comment_body">
+                <button type="button" class="btn btn-primary" id="comment_submit">Submit</button>
+            </form>
         </div>
-      </div>
+    </div>
 </dl>
+
+<script>
+    var len = 0;
+    (function poll() {
+        setTimeout(function () {
+            $.ajax({
+                url: "",
+                method: "POST",
+                headers: {
+                    'X-CSRFToken': '{{csrf_token}}'
+                },
+                data: {
+                    mid: {{ movie.id }}
+                },
+        success: function (data) {
+
+            if (data.length != len) {
+                len = data.length;
+                if (len == null)
+                    len = 0;
+                $("#comments-section").empty();
+                $("#comments_count").empty();
+                $("#comments_count").append(`${len}`);
+                for (var i = 0; i < data.length; i++) {
+                    var time = data[i].date;
+                    var comment_time = new Date(time);
+                    $("#comments-section").append(`<p class="font-weight-bold">
+                                ${data[i].name}
+                                <span class=" text-muted font-weight-normal">
+                                    ${comment_time.toLocaleString()}
+                                </span>
+                            </p>
+                            ${data[i].body}<br><br>`);
+                }
+            }
+        },
+    dataType: "json",
+        complete: poll,
+            timeout: 2000
+            })
+        }, 1000);
+    }) ();
+    $(document).ready(function () {
+        $("#comment_submit").click(function () {
+            var comment = $("#comment_body").val();
+
+            $.ajax({
+                url: "{% url 'add-comment' %}",
+                method: "POST",
+                headers: {
+                    'X-CSRFToken': '{{csrf_token}}'
+                },
+                data: {
+                    comment: comment,
+                    mid: {{ movie.id }},
+            },
+        success: function (status) {
+            $("#comment_body").val('');
+        },
+        error: function (status) {
+            alert("Unable to add comment");
+        }
+        });
+    });
+    $("#update-data").click(function () {
+        $(".details").hide();
+        $(".update").show();
+        $("#submit_updated_data").click(function () {
+            var title = $("#inputtitle").val();
+            var director = $("#inputdirectorname").val();
+            var actors = $("#inputactorsname").val();
+            var description = $("#inputdescription").val();
+            var movie_url = $("#inputmovieurl").val();
+            var mid = "{{ movie.id }}";
+
+        $.ajax({
+            url: "{% url 'update-data' %}",
+            method: "POST",
+            headers: {
+                'X-CSRFToken': '{{csrf_token}}'
+            },
+            data: {
+                title: title,
+                director: director,
+                actors: actors,
+                description: description,
+                movie_url: movie_url,
+                mid: mid,
+            },
+            success: function (status) {
+                window.location.reload()
+            },
+            error: function (status) {
+                alert("Unable to add comment");
+            }
+        });
+    });});
+});
+</script>
 {% endblock %}

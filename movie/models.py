@@ -23,4 +23,4 @@ class Comment(models.Model):
         ordering = ['created_date']
 
     def __str__(self):
-        return 'Comment {} by {}'.format(self.body, self.user.get_full_name)
+        return 'Comment {} by {}'.format(self.body, self.user.get_full_name())

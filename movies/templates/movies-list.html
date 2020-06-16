@@ -9,31 +9,84 @@
 {% block content %}
 
 <h3>Books list</h3>
-<div class="row">
-    <div class="col-sm-3">
-        Title: <input type="text" name="title" id="title">
-    </div>
+{% if user.is_superuser %}
+<div class="mb-4">
+    <a href="{%url 'new-movie'%}"><button class="btn btn-info" type="button">Add New Movie</button></a>
 </div>
-<div class="row">
-    <button id="search_button" class="btn btn-primary">Search</button>
-</div>
-<table class="table" id="datatable">
+{% endif %}
+<!-- <table class="table" id="datatable">
     <thead>
         <tr>
-        <th scope="col">#</th>
-        <th scope="col">Title</th>
-        <th scope="col">Released On</th>
+            <th scope="col">#</th>
+            <th scope="col">Title</th>
+            <th scope="col">Released On</th>
         </tr>
     </thead>
     <tbody>
         {% for movie in movies %}
         <tr>
-        <th scope="row">{{ forloop.counter }}</th>
-        <td><a href="/movie/{{ movie.id }}/">{{ movie.title }}</a></td>
-        <td>{{ movie.release_date }}</td>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td><a href="/movie/{{ movie.id }}/">{{ movie.title }}</a></td>
+            <td>{{ movie.release_date }}</td>
         </tr>
         {% endfor %}
     </tbody>
-</table>
+</table> -->
+<style>
+    .movie-card:hover {
+        cursor: pointer;
+    }
+
+    .movie-card {
+        margin: 0;
+        width: 200px;
+        height: 200px;
+        background-color: #bebefd;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        {% for movie in movies %}
+        <div class="col-3">
+            <div class="card movie-card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ movie.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">by {{movie.director}}</h6>
+                    <p class="card-text mb-4" style="font-size: 0.9rem;">
+                        Released On: {{movie.release_date}} 
+                    </p>
+                    <div ><button onclick="window.location.href='/movie/{{ movie.id }}/'" type="button"
+                        class="btn btn-primary">Details</button>
+                    <button type="button" class="btn btn-danger delete"
+                        name="{{movie.id}}" id="delete_movie">Delete</button></div>
+                    
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+<script>
+    $(document).ready(function () {
+    $(".delete").click(function(){
+        var id = $(this).attr('name');
+        let confirmation = confirm("Are you sure you want to remove this Movie?");
+        if (confirmation) {
+        $.ajax({
+            url: "",
+            method: "POST",
+            headers: {
+                'X-CSRFToken': '{{csrf_token}}'
+            },
+            data:{
+                mid:id,
+            },
+            success:function(data){
+                window.location.reload()
+            },
+        });}
+    });});
+</script>
 
 {% endblock %}
