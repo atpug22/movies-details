@@ -59,3 +59,7 @@ def registerView(request):
     else:
         return render(request, 'register.html')
 
+@login_required
+def profileView(request):
+    return render(request,'profile.html')
+
